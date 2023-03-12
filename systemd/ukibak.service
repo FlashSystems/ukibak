@@ -1,0 +1,7 @@
+[Unit]
+Description=Create a backup copy of the last known good UKI
+
+[Service]
+Type=oneshot
+EnvironmentFile=-/etc/ukibak.conf
+ExecStart=/usr/sbin/ukibak

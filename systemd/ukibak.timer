@@ -1,0 +1,10 @@
+[Unit]
+Description=Timer for backing up the last known good UKI
+
+[Timer]
+OnStartupSec=5min
+Persistent=false
+WakeSystem=false
+
+[Install]
+WantedBy=timers.target
