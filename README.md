@@ -63,3 +63,7 @@ To make the created backup usable, a boot menu option must be created. If you us
 ```
 efibootmgr --create --disk /dev/sdX --part partition_number --label "Linux (last good configuration)" --loader 'EFI\Linux\linux-last.efi' --unicode
 ```
+
+# Credits
+
+The test files for the PE parser are taken from [corkami](https://github.com/corkami) to have a wide variate of different (and strange) cases for testing.
