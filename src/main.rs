@@ -48,9 +48,7 @@ quick_error! {
 /// Simple program to greet a person
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
-#[command(group(ArgGroup::new("dest")
-        .required(true)
-))]
+#[command(group(ArgGroup::new("dest")))]
 struct Args {
     /// Absolute path to the esp.
     #[arg(short, long, value_name="ESP", env="UKIBAK_ESP")]
