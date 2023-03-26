@@ -1,4 +1,4 @@
-# Unified Kernel Image Backup Utility
+# Unified Kernel Image backup utility
 
 To facilitate secure boot the Linux kernel can be combined with an initrd and its command line into a Unified Kernel Image. This combined image contains all information and binaries needed to boot the system. It is meant to be signed as a whole to allow measuring the boot process of the kernel and securing the system against an [evil maid attack](https://en.wikipedia.org/wiki/Evil_maid_attack).
 
