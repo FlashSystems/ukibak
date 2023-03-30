@@ -1,10 +1,11 @@
-use std::{fs::File, path::{Path, PathBuf}, ffi::OsString, collections::HashSet};
+use std::{fs::File, path::{Path, PathBuf}, ffi::OsString, collections::HashSet, time::Duration};
 use clap::{Parser, ArgGroup};
 use byteorder::{ReadBytesExt, LittleEndian};
 use log::{error, debug, info, warn};
 use quick_error::quick_error;
 
 mod peparser;
+mod boottime;
 
 quick_error! {
     #[derive(Debug)]
@@ -41,6 +42,9 @@ quick_error! {
         }
         MissingSection(images: Vec<&'static str>) {
             display("Some sections ({}) that should be inside a unified kernel image missing. Making a backup copy of this image will not capture all necessary information to boot the system.", images.join(", "))
+        }
+        BootTimeUnkown {
+            display("Boot time could not be termined.")
         }
     }
 }
@@ -80,11 +84,11 @@ struct Args {
     #[arg(short, long)]
     force: bool,
 
-    /// Always make a copy of the source EFI file, even if the checksums of both files match.
+    /// Always make a copy of the source EFI file, even if the checksums of both files match or the file is newer than the last reboot.
     ///
     /// Beware that this will also copy the backup copy over itself if it is the currently booted UKI! Use with care.
     #[arg(short = 'F', long)]
-    forcecopy: bool,
+    forcecopy: bool
 }
 
 /// Extracts the load_image_name of a UKI image from an evivarfs filesyystem.
@@ -211,6 +215,20 @@ fn get_dest_path(source_path: &Path, name: &Option<OsString>, absname: &Option<O
     }
 }
 
+fn check_modify_ts(file: &Path, min_age: Duration) -> Result<bool, Error> {
+    let modified = std::fs::metadata(file)
+        .and_then(|m| m.modified())
+        .map_err(|e| { Error::Io(e, file.to_owned()) })?;
+
+    if let Ok(age) = modified.elapsed() {
+        debug!("File was modified {}s ago. Minimum age is {}s.", age.as_secs(), min_age.as_secs());
+        Ok(age > min_age)
+    } else {
+        warn!("File {} is from the future. Interpreting this as if it was modified now.", file.display());
+        Ok(false)
+    }
+}
+
 fn backup_uki(args: &Args) -> Result<(), Error> {
     // Create a list of ESP paths.
     // If a path is given on the command line, use only this path.
@@ -240,12 +258,22 @@ fn backup_uki(args: &Args) -> Result<(), Error> {
     // if sections are missing or if the file is something else.
     match check_uki(&source_path) {
         Ok(source_hash) => {
-            if args.forcecopy || source_hash != check_uki(&dest_path).unwrap_or(0) {
-                info!("Copying '{}' to '{}'...", source_path.display(), dest_path.display());
-                std::fs::copy(&source_path, dest_path).map_err(|e| { Error::Io(e, source_path) })?;
-                debug!("Copy succeeded.");
+            // Check the modify-timestamp of the file to make sure we don't copy it if it was
+            // currently updated.
+            let time_since_boot = boottime::time_since_boot().ok_or(Error::BootTimeUnkown)?;
+            debug!("Time since last reboot is {}s", time_since_boot.as_secs());
+
+            if args.forcecopy || check_modify_ts(&source_path, time_since_boot)? {
+                // Check the checksum of the header to decide if the file should be copied.
+                if args.forcecopy || source_hash != check_uki(&dest_path).unwrap_or(0) {
+                    info!("Copying '{}' to '{}'...", source_path.display(), dest_path.display());
+                    std::fs::copy(&source_path, dest_path).map_err(|e| { Error::Io(e, source_path) })?;
+                    debug!("Copy succeeded.");
+                } else {
+                    info!("Checksums of '{}' and '{}' match. Skipping copy.", source_path.display(), dest_path.display());
+                }
             } else {
-                info!("Checksums of '{}' and '{}' match. Skipping copy.", source_path.display(), dest_path.display());
+                info!("File '{}' was modified since the last reboot. Skipping copy.", source_path.display());
             }
         },
         Err(err) => {
@@ -269,6 +297,7 @@ fn main() {
             Error::FileNameRequired(_) => 1,
             Error::AbsPathRequired => 1,
             Error::Io(_, _) => 2,
+            Error::BootTimeUnkown => 2,
             Error::Utf16(_) => 3,
             Error::EspNotFound(_) => 3,
             Error::UkiParseError(_) => 4,

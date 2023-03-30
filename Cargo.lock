@@ -165,6 +165,7 @@ dependencies = [
  "byteorder",
  "clap",
  "const-fnv1a-hash",
+ "libc",
  "log",
  "quick-error",
  "simple_logger",

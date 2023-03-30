@@ -23,6 +23,7 @@ If we now modify the kernel command line or the initrd and create an unbootable 
 
 1. Check that the currently booted kernel isn't already the backup copy.
 1. Check that the currently booted kernel image is in deed a UKI and that it contains at least the kernel, an initrd and the kernel command line. This makes sure that we do not create an unusable backup copy.
+1. Check that the currently booted kernel image was not modified since the last reboot. This is done to make sure that image has at least booted once successfully before we copy it.
 1. Check that the currently booted kernel is different from the backup copy. This makes sure that we do not make unnecessary copy operations that may be slow and can wear out your eMMC or SDCard. This check is fast because only the header of the UKI is checked. It contains enough information do decide if the UKI was updated. [^include1]
 
 [^esp]: EFI system partition
@@ -60,7 +61,7 @@ To enable the timer use: `systemctl enable --now ukibak.timer`. This will also s
 
 To make the created backup usable, a boot menu option must be created. If you use the default configuration of `ukibak`, the parameters must be the same as for the default linux boot entry. Only the name of the loader must be changed:
 
-```
+```bash
 efibootmgr --create --disk /dev/sdX --part partition_number --label "Linux (last good configuration)" --loader 'EFI\Linux\linux-last.efi' --unicode
 ```
 
