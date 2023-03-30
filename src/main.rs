@@ -141,6 +141,7 @@ fn check_uki(source: &Path) -> Result<u64, Error> {
     let pe_info = peparser::parse(&mut image_file)?;
 
     for section_name in pe_info.1.into_iter() {
+        debug!("Found section {}", section_name);
         missing_sections.remove(section_name.as_str());
     }
 
