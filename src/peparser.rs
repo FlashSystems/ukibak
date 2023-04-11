@@ -1,22 +1,17 @@
 use std::io::{Read, Seek, SeekFrom};
-use quick_error::quick_error;
 use byteorder::{ReadBytesExt, BigEndian, LittleEndian};
 
 const MZ_SIGNATURE: u16 = 0x4d5a;
 const PE_START_OFFSET: u64 = 0x3c;
 const PE_SIGNATURE: u32 = 0x50450000;
 
-quick_error! {
-    #[derive(Debug)]
-    pub enum Error {
-        Io(err: std::io::Error) {
-            from()
-            display("I/O error: {}", err)
-        }
-        InvalidImageFormat {
-            display("Invalid image format. Not a PE file.")
-        }
-    }
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    #[error("I/O error: {0}")]
+    Io(#[from] std::io::Error),
+    
+    #[error("Invalid image format. Not a PE file.")]
+    InvalidImageFormat
 }
 
 /// Converts a zero terminated byte array into a string that contains

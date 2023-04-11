@@ -13,7 +13,7 @@ codegen-units = 1
 [dependencies]
 clap = { version = "4", default-features = false, features = ["std", "help", "usage", "error-context", "derive", "env"] }
 libc = "0.2"
-quick-error = "2"
+thiserror = "1.0"
 byteorder = "1.4.3"
 log = "0.4"
 simple_logger = { version = "4", default-features = false, features = ["stderr"] }

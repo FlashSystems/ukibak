@@ -2,51 +2,44 @@ use std::{fs::File, path::{Path, PathBuf}, ffi::OsString, collections::HashSet, 
 use clap::{Parser, ArgGroup};
 use byteorder::{ReadBytesExt, LittleEndian};
 use log::{error, debug, info, warn};
-use quick_error::quick_error;
 
 mod peparser;
 mod boottime;
 
-quick_error! {
-    #[derive(Debug)]
-    pub enum Error {
-        Io(err: std::io::Error, file: PathBuf) {
-            source(err)
-            display("I/O error while accessing {}: {}", file.display(), err)
-        }
-        Utf16(err: std::string::FromUtf16Error) {
-            from()
-            display("Error reading EFI variable: {}", err)
-        }
-        UkiParseError(err: peparser::Error) {
-            from()
-            display("Parsing image failed: {}", err)
-        }
-        EspNotFound(paths: String) {
-            display("ESP not found. Tried {}.", paths)
-        }
-        SourceNotFound(path: PathBuf) {
-            display("Source image '{}' not found.", path.display())
-        }
-        InvalidSourcePath(path: PathBuf) {
-            display("Source image '{}' path invalid.", path.display())
-        }
-        DestinationPathInvalid(path: PathBuf) {
-            display("'{}' is not a valid destination path. It may not exist or may name a file insted of a directory.", path.display())
-        }
-        FileNameRequired(name: OsString) {
-            display("The file name '{}' contains a path seperator. This is not allowed.", name.to_string_lossy())
-        }
-        AbsPathRequired {
-            display("Absolute path required. Use -f to force usage of a relative path.")
-        }
-        MissingSection(images: Vec<&'static str>) {
-            display("Some sections ({}) that should be inside a unified kernel image missing. Making a backup copy of this image will not capture all necessary information to boot the system.", images.join(", "))
-        }
-        BootTimeUnkown {
-            display("Boot time could not be termined.")
-        }
-    }
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    #[error("I/O error while accessing {}: {0}", .1.display())]
+    Io(#[source] std::io::Error, PathBuf),
+    
+    #[error("Error reading EFI variable: {0}")]
+    Utf16(#[from] std::string::FromUtf16Error),
+
+    #[error("Parsing image failed: {0}")]
+    UkiParseError(#[from] peparser::Error),
+    
+    #[error("ESP not found. Tried {0}.")]
+    EspNotFound(String),
+    
+    #[error("Source image '{}' not found.", .0.display())]
+    SourceNotFound(PathBuf),
+    
+    #[error("Source image '{}' path invalid.", .0.display())]
+    InvalidSourcePath(PathBuf),
+    
+    #[error("'{}' is not a valid destination path. It may not exist or may name a file insted of a directory.", .0.display())]
+    DestinationPathInvalid(PathBuf),
+    
+    #[error("The file name '{}' contains a path seperator. This is not allowed.", .0.to_string_lossy())]
+    FileNameRequired(OsString),
+    
+    #[error("Absolute path required. Use -f to force usage of a relative path.")]
+    AbsPathRequired,
+    
+    #[error("Some sections ({}) that should be inside a unified kernel image missing. Making a backup copy of this image will not capture all necessary information to boot the system.", .0.join(", "))]
+    MissingSection(Vec<&'static str>),
+    
+    #[error("Boot time could not be termined.")]
+    BootTimeUnkown
 }
 
 /// Simple program to greet a person
