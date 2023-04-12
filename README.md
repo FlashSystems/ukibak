@@ -67,6 +67,8 @@ efibootmgr --create --disk /dev/sdX --part partition_number --label "Linux (last
 
 # How to build and install ukibak
 
+## From source
+
 To use `ukibak` on one of your systems just clone this repository and execute the following commands:
 
 ```bash
@@ -75,6 +77,10 @@ install -Dm0750 -t "/usr/sbin/" "target/release/ukibak"
 install -Dm0755 -t "/etc/systemd/system" "systemd/ukibak.service"
 install -Dm0755 -t "/etc/systemd/system" "systemd/ukibak.timer"
 ```
+
+## Via the arch linux AUR
+
+There is an [AUR package](https://aur.archlinux.org/packages/ukibak) for arch linux that can be installed via your favourite AUR helper.
 
 # Credits
 
