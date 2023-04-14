@@ -80,7 +80,7 @@ install -Dm0755 -t "/etc/systemd/system" "systemd/ukibak.timer"
 
 ## Via the arch linux AUR
 
-There is an [AUR package](https://aur.archlinux.org/packages/ukibak) for arch linux that can be installed via your favourite AUR helper.
+There is an [AUR package](https://aur.archlinux.org/packages/ukibak) for arch linux that can be [installed manually](https://wiki.archlinux.org/title/Arch_User_Repository) or via your favourite AUR helper.
 
 # Credits
 
