@@ -155,7 +155,7 @@ fn get_esp_path_from_list<'p>(paths: &[&'p Path], allow_relative: bool) -> Resul
             if !allow_relative { Err(Error::AbsPathRequired)?; }
         }
 
-        if path.exists() && path.is_dir() {
+        if path.is_dir() {
             return Ok(path);
         }
     }
@@ -196,7 +196,7 @@ fn get_dest_path(source_path: &Path, name: &Option<OsString>, absname: &Option<O
     }
 
     // Check that the parent directory of the destination path exists.
-    if dest_path.parent().map(|p| p.exists() && p.is_dir()).unwrap_or(false) {
+    if dest_path.parent().map(|p| p.is_dir()).unwrap_or(false) {
 
         // Verify that the destination is a path
         if dest_path.file_name().is_some() && !dest_path.is_dir() {
