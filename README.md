@@ -9,7 +9,7 @@ Maybe, but even if you do not want to use secure boot a UKI can have a nice adva
 
 ## Having a bootable backup
 
-The UKI contains all parts necessary to boot you system. The kernel, the initrd and the kernel command line are no longer separate parts. They are combined into one file. If we backup this file, we've got a complete backup of this system configuration. If we keep this backup within the ESP[^esp], this backup can simply be added to the boot menu and can be used if something goes wrong with the current kernel image or configuration.
+The UKI contains all parts necessary to boot your system. The kernel, the initrd and the kernel command line are no longer separate parts. They are combined into one file. If we backup this file, we've got a complete backup of this system configuration. If we keep this backup within the ESP[^esp], this backup can simply be added to the boot menu and can be used if something goes wrong with the current kernel image or configuration.
 
 Let's say we've got a tool that creates a backup copy of the UKI some time after the system was booted. Maybe 5 minutes after the boot, we conclude that the system is stable enough to make a snapshot of the current kernel, initrd and command line.
 
