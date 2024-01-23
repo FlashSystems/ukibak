@@ -85,7 +85,7 @@ struct Args {
 }
 
 /// Extracts the load_image_name of a UKI image from an evivarfs filesyystem.
-fn get_loader_image_name(efivarfs: &Path) -> Result<String, Error>{
+fn get_relative_loader_image_name(efivarfs: &Path) -> Result<String, Error>{
     let lii_filename = efivarfs.join("LoaderImageIdentifier-4a67b082-0a4c-41cf-b6c7-440b29bb8c4f");
     let mut efi_var = File::options()
         .read(true)
@@ -105,7 +105,11 @@ fn get_loader_image_name(efivarfs: &Path) -> Result<String, Error>{
         // Replace backslash by slash
         if char == 92 { char = 47 }
 
-        buffer.push(char);
+        // Do not push the first slash(es). This makes sure the returned path
+        // is relative and can be joint with the base path of the mountpoint.
+        if !(buffer.is_empty() && char == 47) {
+            buffer.push(char);
+        }
     }
 
     Ok(String::from_utf16(&buffer[..])?)
@@ -236,7 +240,7 @@ fn backup_uki(args: &Args) -> Result<(), Error> {
     // Select a path from the list.
     let esp_path = get_esp_path_from_list(&esp_paths, args.force)?;
 
-    let active_esp: PathBuf = get_loader_image_name(&PathBuf::from(&args.efivarfs))?.into();
+    let active_esp: PathBuf = get_relative_loader_image_name(&PathBuf::from(&args.efivarfs))?.into();
     debug!("Active loader image name is '{}'.", active_esp.display());
 
     // Combine the relative path of the active ESP with the mountpoint of the ESP
@@ -309,14 +313,26 @@ fn main() {
 mod tests {
     use super::*;
 
-    /// Check that get_loader_image_name returns the correct image name.
+    /// Check that get_relative_loader_image_name returns the correct image name.
     /// This test uses a snapshot of the neccessary efivarfs content in `testdata/efivarfs`.
     #[test]
-    fn load_image_name() {
+    fn load_relative_image_name() {
         let dummy_efivarfs = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("testdata/efivarfs");
+            .join("testdata/efivarfs/relpath");
 
-        assert_eq!(get_loader_image_name(&dummy_efivarfs).unwrap(), "EFI/Linux/test_usable_uki.efi");
+        assert_eq!(get_relative_loader_image_name(&dummy_efivarfs).unwrap(), "EFI/Linux/test_usable_uki.efi");
+    }
+
+    /// Check that get_relative_loader_image_name returns the correct image name.
+    /// This test uses a snapshot of the neccessary efivarfs content in `testdata/efivarfs`.
+    /// The image name is an absolute path that starts with a `\`. This checks that the returned path
+    /// is relative. This catches regressions of bug #1.
+    #[test]
+    fn load_absolute_image_name() {
+        let dummy_efivarfs = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("testdata/efivarfs/abspath");
+
+        assert_eq!(get_relative_loader_image_name(&dummy_efivarfs).unwrap(), "EFI/Linux/test_usable_uki.efi");
     }
 
     /// Verify that the checksum of an existing UKI file is
