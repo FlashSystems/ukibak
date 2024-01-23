@@ -103,11 +103,11 @@ fn get_relative_loader_image_name(efivarfs: &Path) -> Result<String, Error>{
         if char == 0 { break };
 
         // Replace backslash by slash
-        if char == 92 { char = 47 }
+        if char == '\\' as u16 { char = '/' as u16}
 
         // Do not push the first slash(es). This makes sure the returned path
         // is relative and can be joint with the base path of the mountpoint.
-        if !(buffer.is_empty() && char == 47) {
+        if !(buffer.is_empty() && char == '/' as u16) {
             buffer.push(char);
         }
     }
