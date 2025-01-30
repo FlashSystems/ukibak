@@ -8,7 +8,7 @@ mod boottime;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("I/O error while accessing {}: {0}", .1.display())]
+    #[error("I/O error while accessing {path}: {0}", path = .1.display())]
     Io(#[source] std::io::Error, PathBuf),
     
     #[error("Error reading EFI variable: {0}")]

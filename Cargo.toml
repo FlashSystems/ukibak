@@ -13,8 +13,8 @@ codegen-units = 1
 [dependencies]
 clap = { version = "4", default-features = false, features = ["std", "help", "usage", "error-context", "derive", "env"] }
 libc = "0.2"
-thiserror = "1"
+thiserror = "2"
 byteorder = "1"
 log = "0.4"
-simple_logger = { version = "4", default-features = false, features = ["stderr"] }
+simple_logger = { version = "5", default-features = false, features = ["stderr"] }
 const-fnv1a-hash = "1"
