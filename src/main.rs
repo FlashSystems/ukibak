@@ -174,7 +174,7 @@ fn get_dest_path(source_path: &Path, name: &Option<OsString>, absname: &Option<O
     // If the "relname" ist set, check that it is indeed relative and combine it with the
     // basepath of the source EFI file to get the destination path.
     // If "relname" is not set, use "absname" as is.
-    let dest_path = if let Some(ref name) = name {
+    let dest_path = if let Some(name) = name {
         let path = Path::new(name);
 
         if path.file_name().map(|n| n.len()).unwrap_or_default() != name.len() {
