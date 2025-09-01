@@ -138,7 +138,7 @@ fn check_uki(source: &Path) -> Result<u64, Error> {
     let pe_info = peparser::parse(&mut image_file)?;
 
     for section_name in pe_info.1.into_iter() {
-        debug!("Found section {}", section_name);
+        debug!("Found section {section_name}");
         missing_sections.remove(section_name.as_str());
     }
 
@@ -275,7 +275,7 @@ fn backup_uki(args: &Args) -> Result<(), Error> {
             }
         },
         Err(err) => {
-            warn!("{}", err);
+            warn!("{err}");
             if !args.force { Err(err)?; }
         }
     }
@@ -289,7 +289,7 @@ fn main() {
     setup_logging(args.quiet, args.debug);
 
     if let Err(err) = backup_uki(&args) {
-        error!("{}", err);
+        error!("{err}");
 
         let exit_code = match err {
             Error::FileNameRequired(_) => 1,

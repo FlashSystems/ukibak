@@ -120,7 +120,7 @@ mod tests {
 
         let mut expected_sections = HashSet::from([".text", ".reloc", ".data", ".dynamic", ".rela", ".dynsym", ".sbat", ".sdmagic", ".osrel", ".cmdline", ".linux", ".initrd"]);
         for section in sections {
-            assert!(expected_sections.remove(section.as_str()), "Unexpected section {} in section list.", section);
+            assert!(expected_sections.remove(section.as_str()), "Unexpected section {section} in section list.");
         }
         assert!(expected_sections.is_empty(), "Section(s) {} missing from section list.", expected_sections.into_iter().collect::<Vec<&str>>().join(", "))
     }
